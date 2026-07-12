@@ -18,29 +18,29 @@ The core design goal was to demonstrate a full ML lifecycle — not just a train
 ## 2. Architecture
 
 ```
-                    ┌─────────────────────┐
+                    ┌──────────────────────┐
    EventBridge      │  Weekly Cron Trigger │
    (weekly cron) ───►  cron(0 6 ? * MON *) │
-                    └──────────┬──────────┘
+                    └──────────┬───────────┘
                                │
                                ▼
                     ┌─────────────────────┐
-                    │   Step Functions     │
-                    │   State Machine      │
+                    │   Step Functions    │
+                    │   State Machine     │
                     └──────────┬──────────┘
                                │
         ┌──────────────────────┼──────────────────────┐
         ▼                      ▼                      ▼
- ┌───────────────┐    ┌────────────────┐    ┌───────────────────┐
- │ TrainDeepAR    │───►│ CreateModel     │───►│ BatchTransform     │
- │ (SageMaker)    │    │ (SageMaker)     │    │ (SageMaker)        │
- └───────────────┘    └────────────────┘    └─────────┬──────────┘
+ ┌───────────────┐    ┌─────────────────┐     ┌───────────────────┐
+ │ TrainDeepAR   │───►│ CreateModel     │───► │ BatchTransform    │
+ │ (SageMaker)   │    │ (SageMaker)     │     │ (SageMaker)       │
+ └───────────────┘    └─────────────────┘     └─────────┬─────────┘
                                                         │
                                                         ▼
-                                              ┌────────────────────┐
+                                              ┌─────────────────────┐
                                               │ ComputeMAPE (Lambda)│
                                               │ → CloudWatch Metric │
-                                              └────────────────────┘
+                                              └─────────────────────┘
 
  Parallel: SageMaker Model Monitor (daily schedule)
  reads captured Batch Transform input → checks for data drift
@@ -189,5 +189,5 @@ In practice, this means safety stock shouldn't be a flat buffer applied equally 
 ## 12. Honest Limitations
 
 - Ground-truth actuals for freshly forecasted future periods aren't available in a synthetic-data sandbox project, so accuracy evaluation uses a held-out historical window (last 14 days of the 2-year synthetic history) rather than true future actuals.
-- Model Monitor here tracks *data drift*, not *ground-truth prediction quality drift* — the latter would require a live feedback loop with real actuals arriving after each forecast period, which is a production concern beyond this project's scope.
-- Glue and HPO are designed, not executed, per the budget constraints documented in Section 10.
+- Model Monitor here tracks data drift and not ground-truth prediction quality drift — the latter would require a live feedback loop with real actuals arriving after each forecast period, which is a production concern beyond this project's scope.
+
