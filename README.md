@@ -105,8 +105,6 @@ The synthetic dataset simulates:
 
 ## 6. Cold-Start Strategy
 
-**Requirement addressed:** *"Include a cold-start strategy for new products with little or no sales history."*
-
 DeepAR supports a categorical feature (`cat`) that lets the model share a learned embedding across series in the same category. This project uses each product's baseline demand level to assign it into one of **4 demand tiers** (quartiles: low, medium-low, medium-high, high), computed once from `product_base_demand` and attached to every training, test, and transform record via `"cat": [category_index]`.
 
 In practice, this means a brand-new product with zero sales history can be assigned to the demand tier it's expected to belong to (based on category, price point, or business judgment) and immediately inherit that tier's learned demand pattern, rather than the model having no prior information about it at all. `cardinality="4"` was set in the DeepAR hyperparameters to match the four tiers.
@@ -114,8 +112,6 @@ In practice, this means a brand-new product with zero sales history can be assig
 ---
 
 ## 7. Model Monitoring
-
-**Requirement addressed:** *"SageMaker Model Monitor: to track forecast accuracy... and flag when accuracy degrades."*
 
 Two complementary monitoring mechanisms are used, since they answer different questions:
 
@@ -128,8 +124,6 @@ Both metrics report to CloudWatch, giving both an accuracy signal and a data-int
 ---
 
 ## 8. Automation: Step Functions + EventBridge
-
-**Requirement addressed:** *"Automate the end-to-end pipeline to run on a recurring schedule without manual intervention."*
 
 A Step Functions state machine (`P3-Demand-Forecasting-Pipeline`) chains four states:
 
@@ -154,22 +148,14 @@ In practice, this means safety stock shouldn't be a flat buffer applied equally 
 
 ---
 
-## 10. Cold Start Strategy
-
-DeepAR supports a categorical feature (cat) that lets the model share a learned embedding across series in the same category. This project uses each product's baseline demand level to assign it into one of 4 demand tiers (quartiles: low, medium-low, medium-high, high), computed once from product_base_demand and attached to every training, test, and transform record via "cat": [category_index].
-
-In practice, this means a brand-new product with zero sales history can be assigned to the demand tier it's expected to belong to (based on category, price point, or business judgment) and immediately inherit that tier's learned demand pattern, rather than the model having no prior information about it at all. cardinality="4" was set in the DeepAR hyperparameters to match the four tiers.
-
----
-
-## 11. Using Forecast Uncertainty for Safety-Stock Decisions
+## 10. Using Forecast Uncertainty for Safety-Stock Decisions
 
 DeepAR doesn't just give us a single predicted number for each product's demand — it gives us a full probability range (we captured this as the 0.1, 0.5, and 0.9 quantiles). The gap between the 0.1 and 0.9 quantiles tells us how confident the model is about that specific product-store series. A narrow gap means the model is fairly certain of the demand, so that product can safely run with lean inventory close to the median forecast. A wide gap means genuine uncertainty — the actual demand could swing well above or below the median — and holding stock only to the median forecast risks frequent stockouts whenever real demand lands near the upper end of that range.
 In practice, this means safety stock shouldn't be a flat buffer applied equally across the catalog. Instead, it should scale with each product's own prediction interval: for a given service-level target, safety stock can be set using the gap between the median (0.5) and a chosen upper quantile (e.g., 0.9) rather than a fixed percentage of average demand. Products with wide intervals — typically newer items, low-history products relying on the cold-start category embedding, or those with irregular promo-driven spikes — should carry proportionally more buffer stock, while consistently-selling products with narrow intervals can operate closer to just-in-time levels. This directly ties our model's uncertainty output to a concrete inventory action, rather than treating the forecast as a single deterministic number the business has to blindly trust.
 
 
 ---
-## 12. Notebook Structure (Execution Order)
+## 11. Notebook Structure (Execution Order)
 
 1. Synthetic data generation (`sales_data.csv` → S3 `raw/`)
 2. Demand-tier categorization for cold-start (`product_category`)
