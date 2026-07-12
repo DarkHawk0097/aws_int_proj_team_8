@@ -1,4 +1,4 @@
-# P3 — Demand Forecasting & Inventory Optimization System
+# Demand Forecasting & Inventory Optimization System
 
 - **AWS Academy ML Engineering Internship — Capstone Project P3**
 - **Author:** Arshit Samkria (arshit.24bce10444@vitbhopal.ac.in), Simran Kumari(simran.kumari2024a@vitstudent.ac.in)
